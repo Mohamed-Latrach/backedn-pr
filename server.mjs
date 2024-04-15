@@ -20,6 +20,15 @@ app.use(bodyParser.json());
 // CORS middleware to allow requests from all origins
 app.use(cors());
 
+// Add Content Security Policy header middleware
+app.use((req, res, next) => {
+  res.setHeader(
+    'Content-Security-Policy',
+    "script-src 'self' 'unsafe-inline';"
+  );
+  next();
+});
+
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
  .then(() => console.log('MongoDB connected'))

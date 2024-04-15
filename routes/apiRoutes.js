@@ -39,7 +39,7 @@ router.post('/register', async (req, res) => {
 });
 
 // Login endpoint handler
-router.post('/api/auth/login', async (req, res) => {
+router.post('/login', async (req, res) => {
   try {
     // Extract email and password from request body
     const { email, password } = req.body;
