@@ -1,31 +1,38 @@
-// Import the dotenv module
-import dotenv from 'dotenv';
-dotenv.config();
-
-// Import other modules
+// Import the required modules
 import express from 'express';
 import bodyParser from 'body-parser';
 import mongoose from 'mongoose';
 import cors from 'cors';
+import apiRoutes from './routes/apiRoutes.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { body, validationResult } from 'express-validator';
 import User from './models/User.js';
+import dotenv from 'dotenv';
+dotenv.config();
 
 // Initialize Express app
 const app = express();
 
 // Middleware
-app.use(bodyParser.json());
+app.use(bodyParser.json()); // Add this line to parse JSON request bodies
 
 // CORS middleware to allow requests from all origins
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:5173'
+}));
 
 // Add Content Security Policy header middleware
 app.use((req, res, next) => {
   res.setHeader(
     'Content-Security-Policy',
-    "script-src 'self' 'unsafe-inline';"
-  );
+    "script-src 'self' https://trusted-cdn.com;"  );
+  next();
+});
+
+// Logging Middleware to log incoming requests
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`);
   next();
 });
 
@@ -40,36 +47,14 @@ app.get('/', (req, res) => {
 });
 
 // Define your routes here...
-app.post('/api/auth/login', async (req, res) => {
-  // Get the username and password from the request body
-  const { email, password } = req.body;
+// Get all registered users route
+app.use(apiRoutes);
 
-  // Check if the username and password are provided
-  if (!email ||!password) {
-    return res.status(400).json({ message: 'email and password are required' });
-  }
 
-  // Find the user by username
-  const user = await User.findOne({ email });
-
-  // Check if the user exists
-  if (!user) {
-    return res.status(404).json({ message: 'User not found' });
-  }
-
-  // Compare the provided password with the stored password hash
-  const isPasswordValid = await bcrypt.compare(password, user.password);
-
-  // Check if the password is valid
-  if (!isPasswordValid) {
-    return res.status(401).json({ message: 'Invalid password' });
-  }
-
-  // Generate a JWT token for the user
-  const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-
-  // Send the token as a response
-  res.json({ token });
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send('Something went wrong!');
 });
 
 // Start the server
