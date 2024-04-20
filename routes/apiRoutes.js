@@ -6,64 +6,65 @@ import User from '../models/User.js';
 const router = express.Router();
 
 // Register endpoint handler
-router.post('/api/auth/register', async (req, res) => {
+router.post('/api/auth/register ', async (req, res) => {
   try {
-    // Extract user data from request body
-    const { name, email, password } = req.body;
+    const { name, lastName, email, password, birthdate, gender } = req.body;
 
-    // Check if user with the provided email already exists
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ message: 'User already exists' });
-    }
+    // Validate input (ensure required fields are not empty, etc.)
 
     // Hash the password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10); // 10 is the salt rounds
 
-    // Create a new user document
+    // Create a new user
     const newUser = new User({
       name,
+      lastName,
       email,
-      password: hashedPassword // Store hashed password in the database
+      password: hashedPassword, // Store the hashed password
+      birthdate,
+      gender,
     });
 
-    // Save the user document to the database
+    // Save the user to the database
     await newUser.save();
 
-    // Return a success response
+    // Respond with success message
     res.status(201).json({ message: 'User registered successfully' });
   } catch (error) {
     console.error('Error registering user:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ error: 'Error registering user' });
   }
 });
 
 // Login endpoint handler
-router.post('/api/auth/login', async (req, res) => {
+router.post('/api/auth/login ', async (req, res) => {
   try {
-    // Extract email and password from request body
     const { email, password } = req.body;
 
-    // Find user by email in the database
+    // Validate input (ensure required fields are not empty, etc.)
+
+    // Find the user by email
     const user = await User.findOne({ email });
+
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ error: 'User not found' });
     }
 
-    // Compare password with hashed password in the database
+    // Compare the provided password with the stored hashed password
     const passwordMatch = await bcrypt.compare(password, user.password);
+
     if (!passwordMatch) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+      return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    // Generate JWT token
-    const token = jwt.sign({ userId: user._id }, 'your_secret_key_here', { expiresIn: '1h' });
+    // Generate a JWT token (you'll need a secret key)
+    const token = jwt.sign({ userId: user._id }, 'your-secret-key', { expiresIn: '1h' });
 
-    // Return token and user data in response
-    res.status(200).json({ token, user });
+    // Respond with the token
+    res.status(200).json({ token });
   } catch (error) {
     console.error('Error logging in:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ error: 'Error logging in' });
   }
 });
 
