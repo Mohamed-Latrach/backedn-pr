@@ -1,6 +1,6 @@
 // controllers/users.js
 
-import User from "../models/User.js";
+import { User } from "../models/User.js";
 import { registerValidator, loginValidator } from "../utilities/validators.js";
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
@@ -11,7 +11,7 @@ export const register = async (req, res) => {
         if (validationResult.error) {
             res.status(400).json(validationResult)
         } else {
-            const { firstName, lastName, email, password, gender, birthday } = req.body;
+            const { firstName, lastName, email, password, gender, birthdate } = req.body;
             const existingUser = await User.findOne({ email });
             if (existingUser) {
                 res.status(401).json({ error: "An account with this email exists already" });
@@ -26,7 +26,7 @@ export const register = async (req, res) => {
                 email,
                 password: hashedPassword,
                 gender,
-                birthday
+                birthdate
             });
             await newUser.save();
             res.status(201).json({ message: "Account created successfully" });

@@ -5,10 +5,20 @@ import User from '../models/User.js';
 
 const router = express.Router();
 
+
+app.get('/api/auth/login', users.login);
+app.get('/api/auth/register', users.register);
+
+
+
+
+
+
+
 // Register endpoint handler
 router.post('/api/auth/register ', async (req, res) => {
   try {
-    const { name, lastName, email, password, birthdate, gender } = req.body;
+    const { firstName, lastName, email, password, birthdate, gender } = req.body;
 
     // Validate input (ensure required fields are not empty, etc.)
 
@@ -17,7 +27,7 @@ router.post('/api/auth/register ', async (req, res) => {
 
     // Create a new user
     const newUser = new User({
-      name,
+      firstName,
       lastName,
       email,
       password: hashedPassword, // Store the hashed password

@@ -3,7 +3,7 @@
 import mongoose from 'mongoose'; // Import mongoose using ES module syntax
 
 const userSchema = new mongoose.Schema({
-  name: {
+  firstName: {
     type: String,
     required: true
   },
@@ -30,7 +30,35 @@ const userSchema = new mongoose.Schema({
     required: true
   }
 });
+const profileSchema = new mongoose.Schema({
+  aboutMe: String,
+  username: String,
+  name: String
+});
 
-const User = mongoose.model('User', userSchema);
+const postSchema = new mongoose.Schema({
+  content: String,
+  createdAt: { type: Date, default: Date.now }
+});
+const passwordSchema = new mongoose.Schema({
+  website: {
+    type: String,
+    required: true,
+  },
+  username: {
+    type: String,
+    required: true,
+  },
+  password: {
+    type: String,
+    required: true,
+  },
+});
+export const Password = mongoose.model('Password', passwordSchema);
+export default Password;
 
-export default User; // Export User as default
+export const Post = mongoose.model('Post', postSchema);
+
+export const Profile = mongoose.model('Profile', profileSchema);
+
+export const User = mongoose.model('User', userSchema);
